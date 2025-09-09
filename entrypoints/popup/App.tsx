@@ -3,17 +3,22 @@ import reactLogo from '@/assets/react.svg';
 import wxtLogo from '/wxt.svg';
 import './App.css';
 import { PiSpeakerLowFill } from "react-icons/pi";
-
+import Changemode from '@/elements/changemode';
+import Fiszki from '@/elements/fiszki';
+import Roadmapa from '@/elements/roadmapa';
 function App() {
-  const [text, setText]=useState("COS");
+  const [text, setText]=useState("Tutaj pojawi się streszczenie");
   const [isHidden, setIsHidden] = useState(true);
   const [isRoad, setIsRoad] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
     return savedVolume ? parseInt(savedVolume) : 50;
   });
+ 
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const wasLongPress = useRef(false);
   
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
@@ -111,6 +116,7 @@ function App() {
         <div className='tabs' id='desc' onClick={pokazOpis}>OPIS</div>
         <div className='tabs' onClick={pokazFiszki}>FISZKI</div>
         </div>
+        <div style={{scale:0.7, position:"absolute", right: "0"}}><Changemode /></div>
         <div id='opis'>
           <div className='wybor'>
           <select name="" id="type">
@@ -126,7 +132,6 @@ function App() {
           </div>
         </div>
         <div className='tekst'>
-      <p>
         {text}
         <div className='speaker-container'>
           <PiSpeakerLowFill 
@@ -150,15 +155,14 @@ function App() {
             </div>
           )}
         </div>
-      </p>
       </div>
+          <div className='znajdz'><button style={{width: "70%"}} className='przycisk'>Znajdź podobne</button></div>
 
         <div id='fiszki' className={isHidden ? 'ukryj' : 'pokaz'}>
-        <h2>Fiszki - zawartość</h2>
+        <Fiszki />
         </div>
         <div id='roadmap' className={isRoad ? 'ukryj2' : 'pokaz2'}>
-        <h2>RoadMapa - plan rozwoju</h2>
-        <p>Tutaj będzie mapa drogowa projektu</p>
+        < Roadmapa />
         </div>
 
     </>
