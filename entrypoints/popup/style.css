@@ -1,0 +1,85 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color-scheme: light dark;
+  color: white;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 350px;
+  min-height: 100vh;
+  background-color: var(--darkest);
+}
+
+.mode{
+  width: 100px;
+  border-radius: 25px;
+  height: 40px;
+  position: relative;
+  display: inline-block;
+  background: var(--light);
+  cursor: pointer;
+  box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.4), inset 0 -5px 15px rgba(255, 255,255,0.4);
+  transition: .3s;
+}
+.mode::after{
+  content: "";
+  transition: .3s;
+  position: absolute;
+  width: 40px;
+  border-radius: 50px;
+  height: 40px;
+  left: 0;
+  background: linear-gradient(180deg, var(--darkest), var(--dark));
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+.eh:checked + .mode::after{
+  left: 100%;
+  transform: translate(-100%);
+}
+.eh:active + .mode::after{
+  width: 60px;
+}
+.moon{
+  position: absolute;
+  left: 10%;
+  top: 60%;
+  width: 20px;
+  opacity: 1;
+  transition: .3s;
+  scale: 1.5;
+  transform: translateY(-60%);
+  z-index: 10;
+}
+.eh:checked +label .moon{
+  opacity: 0;
+  left: 70%;
+}
+.sun{
+  position: absolute;
+  left: 10%;
+  top: 80%;
+  width: 20px;
+  opacity: 0;
+  transition: .3s;
+  scale: 2;
+  transform: translateY(-80%);
+  z-index: 10;
+}
+.eh:checked +label .sun{
+  opacity: 1;
+  left: 71%;
+}
