@@ -109,6 +109,17 @@ function App() {
     });
     }
 
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === "popupAction") {
+        if (message.action === "tekscik2") {
+          przycisk2();
+        }
+      }
+    });
+    przycisk2();
+  }, []);
+
   return (
     <>
         <div className='nav'>
