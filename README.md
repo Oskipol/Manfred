@@ -19,3 +19,7 @@ Manfred to projekt wtyczki real-time LLM do przeglądarki mający pomagać użyt
 - Różne typy streszczeń.
 - Generowanie planów nauki.
   
+## 4. klucz api do deepseek
+sk-4ef0fc11981d45b59c2264a948d07b4d
+
+
