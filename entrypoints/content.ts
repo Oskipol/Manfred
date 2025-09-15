@@ -4,6 +4,11 @@ export default defineContentScript({
     let lastSelection = '';
     let icon: HTMLElement | null = null;
 
+    chrome.runtime.sendMessage({
+      type: 'currentUrl',
+      url: window.location.href,
+    })
+
     document.addEventListener('mouseup', () => {
       const selection = window.getSelection();
       if (selection && selection.toString().trim() !== '') {
