@@ -12,6 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "@langchain/openai": "^0.6.11",
-    "langchain": "^0.3.33"
+    "langchain": "^0.3.34"
   }
 }
