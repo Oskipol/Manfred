@@ -8,18 +8,19 @@ export default defineBackground(() => {
       (async () => {
         try {
           const model = new ChatOpenAI({
-            model: "gpt-4o-mini", 
+            model: message.Mymodel || "gpt-4o-mini", 
             apiKey: import.meta.env.API_KEY,
+            temperature: message.temperature || 0,
           });
 
           const chatPrompt = ChatPromptTemplate.fromMessages([
-            ["system", "You are a helpful assistant that summarizes websites."],
+            ["system", message.systemPrompt || "You are a helpful assistant that summarizes websites."],
             [
               "user", 
-              "Summarize the page in less than 700 characters. This should be a continuous text. Highlight the most important information. website: {website}"
+              `${message.prompt}, website: {website}`
             ]
           ]);
-
+          console.log(message.temperature);
           const promptValue = await chatPrompt.invoke({ website: message.tekst });
           const response = await model.invoke(promptValue);
           
