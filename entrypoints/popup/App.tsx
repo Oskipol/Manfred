@@ -9,19 +9,48 @@ function App() {
   const [isHidden, setIsHidden] = useState(true);
   const [isRoad, setIsRoad] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [temperature, setTemperature] = useState(0);
-  const [Mymodel, setMymodel] = useState("gpt-4o-mini");
-  const [prompt, setPrompt] = useState("Summarize the page in less than 700 characters. This should be a continuous text. Highlight the most important information.");
-  const [systemPrompt, setSystemPrompt] = useState("You are a helpful assistant that summarizes websites.");
+  const [Mymodel, setMymodel] = useState("casual_eng");
+  const [summaryLength, setSummaryLength] = useState(0);
 
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
     return savedVolume ? parseInt(savedVolume) : 50;
   });
- 
+ const snapToNearest = (value: number) => {
+    if (value <= 33) return 0;
+    if (value <= 66) return 1;
+    return 2;
+  };
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
   const wasLongPress = useRef(false);
-  
+  const getLengthLabel = (value: number) => {
+    switch(value) {
+      case 0: return "Short";
+      case 1: return "Medium";
+      case 2: return "Detailed";
+      default: return "Short";
+    }
+  };
+
+  const getLengthKey = (value: number) => {
+    switch(value) {
+      case 0: return "l1";
+      case 1: return "l2";
+      case 2: return "l3";
+      default: return "l1";
+    }
+  };
+
+  const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    const snappedValue = snapToNearest(value);
+    setSummaryLength(snappedValue);
+  };
+
+  useEffect(() => {
+    localStorage.setItem('summaryLength', summaryLength.toString());
+  }, [summaryLength]);
+
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -90,7 +119,7 @@ function App() {
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
       chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
         (response)=>{
-          chrome.runtime.sendMessage({type: "ustaw", tekst: response, temperature: temperature, Mymodel: Mymodel, prompt: prompt, systemPrompt: systemPrompt},
+          chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength)},
             (res)=> setText(res)
           );
 
@@ -121,13 +150,31 @@ function App() {
         <div style={{scale:0.7, position:"absolute", right: "0"}}><Changemode /></div>
         <div id='opis'>
           <div className='wybor'>
-          <select name="" id="type">
-            <option value="1">Jeden</option>
-            <option value="2">Dwa</option>
-            <option value="3">Trzy</option>
-            <option value="4">Cztery</option>
+          <select 
+            id="type" 
+            value={Mymodel}
+            onChange={(e) => setMymodel(e.target.value)}
+          >
+            <option value="casual_eng" disabled >Wybierz model</option>
+            <option value="prof_eng">Professional English</option>
+            <option value="prof_pl">Professional Polish</option>
+            <option value="casual_eng">Casual English</option>
+            <option value="casual_pl">Casual Polish</option>
           </select>
+          
           </div>
+          <div className="slider-container">
+            <label>{getLengthLabel(summaryLength)}</label>
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={summaryLength * 50} 
+              onChange={handleLengthChange}
+              className="length-slider"
+            />
+          </div>
+          
           <div className='przyciski'>
         <button className='przycisk' onClick={przycisk}>Streść Całość</button>
         <button className='przycisk' onClick={przycisk2}>Streść Zaznaczone</button>
@@ -159,52 +206,6 @@ function App() {
         </div>
       </div>
           <div className='znajdz'><button style={{width: "70%"}} className='przycisk'>Znajdź podobne</button></div>
-          Temperatura
-          <input 
-            type="number" 
-            id="temperature"
-            min={0}
-            max={2}
-            step={0.1}
-            value={temperature}
-            onChange={(e) => setTemperature(parseFloat(e.target.value))}
-            className='temperature-input'
-          />
-          <br />
-          Model
-          <select 
-            id="model" 
-            value={Mymodel}
-            onChange={(e) => setMymodel(e.target.value)}
-            className='model-select'
-          >
-            <option value="gpt-5-mini">GPT-5 Mini</option>
-            <option value="gpt-5-nano">GPT-5 Nano</option>
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-          </select>
-          <br />
-          Prompt
-          <br />
-          <textarea 
-            id="prompt"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className='prompt-textarea'
-            rows={4}
-            placeholder="Wprowadź custom prompt..."
-          />
-          <br />
-          System Prompt
-          <br />
-          <textarea 
-            id="system-prompt"
-            value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
-            className='prompt-textarea'
-            rows={4}
-            placeholder="Wprowadź custom prompt..."
-          />
         <div id='fiszki' className={isHidden ? 'ukryj' : 'pokaz'}>
         <Fiszki />
         </div>
