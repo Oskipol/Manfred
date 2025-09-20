@@ -6,8 +6,13 @@ export default defineBackground(() => {
     if (message.type === 'ustaw') {
       (async () => {
         try {
+          const tabs = await chrome.tabs.query({active: true, currentWindow: true})
+          const currentUrl = tabs[0]?.url
           console.log('powinno generowac')
-          const answer = await rag('sigma url trzeba przekazac ale nie wiem jak i zmienic ten hardcodowany w rag.ts')
+          if(!currentUrl) {
+            throw new Error('Nie można pobrać url')
+          }
+          const answer = await rag(currentUrl)
           sendResponse({answer})
         } catch (error) {
           console.error('Błąd AI:', error);

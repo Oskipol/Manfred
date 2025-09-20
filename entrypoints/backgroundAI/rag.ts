@@ -8,7 +8,6 @@ import { api_key } from '@/api';
 const llm = new ChatOpenAI({
   model: "gpt-5-mini",
   apiKey: api_key,
-  temperature: 0
 });
 
 export async function rag(url: string) {
@@ -50,7 +49,7 @@ export async function rag(url: string) {
     const generate = async (state: typeof StateAnnotation.State) => {
         console.log('generowanie odpowiedzi')
         const messages = await promptTemplate.invoke({
-            content: state.processedContent, 
+            context: state.processedContent, 
             question: state.question,
         })
 
