@@ -6,7 +6,9 @@ export default defineBackground(() => {
     if (message.type === 'ustaw') {
       (async () => {
         try {
-          sendResponse('generuje streszczenie');
+          console.log('powinno generowac')
+          const answer = await rag('sigma url trzeba przekazac ale nie wiem jak i zmienic ten hardcodowany w rag.ts')
+          sendResponse({answer})
         } catch (error) {
           console.error('Błąd AI:', error);
           sendResponse(`Błąd: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);

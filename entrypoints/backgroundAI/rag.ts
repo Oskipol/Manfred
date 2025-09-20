@@ -1,12 +1,8 @@
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
-import { Document } from 'langchain/document';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { pull } from 'langchain/hub';
 import { Annotation, StateGraph } from '@langchain/langgraph';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { ChatOpenAI } from '@langchain/openai';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory'
 import { api_key } from '@/api';
 
 const llm = new ChatOpenAI({
@@ -15,58 +11,65 @@ const llm = new ChatOpenAI({
   temperature: 0
 });
 
-const embeddings = new OpenAIEmbeddings({
-    model: 'text-embedding-3-large'
-});
-
-const vectorStore = new MemoryVectorStore(embeddings)
-
 export async function rag(url: string) {
-    const cheerioLoader = new CheerioWebBaseLoader('https://www.lipsum.com/')
-
-    const docs = await cheerioLoader.load();
-
-    const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000, chunkOverlap: 200
-    })
-
-    const allSplits = await splitter.splitDocuments(docs);
-
-    await vectorStore.addDocuments(allSplits);
-
-    const promptTemplate = await pull<ChatPromptTemplate>('rlm/rag-prompt')
+    const StateAnnotation = Annotation.Root({
+        url: Annotation<string>(),
+        rawContent: Annotation<string>(),
+        processedContent: Annotation<string>(),
+        question: Annotation<string>(),
+        answer: Annotation<string>(),
+    });
 
     const InputStateAnnotation = Annotation.Root({
         question: Annotation<string>,
     });
 
-    const StateAnnotation = Annotation.Root({
-        question: Annotation<string>,
-        context: Annotation<Document[]>,
-        answer: Annotation<string>,
-    });
+    const promptTemplate = await pull<ChatPromptTemplate>('rlm/rag-prompt')
 
-    const retrieve = async (state: typeof InputStateAnnotation.State) => {
-        const retrievedDocs = await vectorStore.similaritySearch(state.question)
-        return { context: retrievedDocs}
+    const load = async (state: typeof StateAnnotation.State) => {
+        console.log('ladowanie danych')
+        const cheerioLoader = new CheerioWebBaseLoader(state.url)
+
+        const docs = await cheerioLoader.load();
+
+        const rawContent = docs.map(doc => doc.pageContent).join('\n\n')
+
+        console.log('dane zaladowane')
+        return { rawContent}
+    }
+
+    const retrieve = async (state: typeof StateAnnotation.State) => {
+        console.log('czysczenie danych')
+        let content = state.rawContent;
+
+        content = content.replace(/\s+/g, ' ').trim();
+
+        return { processedContent: content }
     }
 
     const generate = async (state: typeof StateAnnotation.State) => {
-        const docsContent = state.context.map((doc: { pageContent: any; }) => doc.pageContent).join('\n');
-        const messages = await promptTemplate.invoke({question: state.question, context: docsContent})
+        console.log('generowanie odpowiedzi')
+        const messages = await promptTemplate.invoke({
+            content: state.processedContent, 
+            question: state.question,
+        })
+
         const response = await llm.invoke(messages);
-        return { answer: response.content}
+
+        return { answer: response.content as string }
     }
 
     const graph = new StateGraph(StateAnnotation)
+        .addNode('load', load)
         .addNode('retrieve', retrieve)
         .addNode('generate', generate)
-        .addEdge('__start__', 'retrieve')
+        .addEdge('__start__', 'load')
+        .addEdge('load', 'retrieve')
         .addEdge('retrieve', 'generate')
         .addEdge('generate', '__end__')
         .compile()
 
-    let input = { question: 'Summarize this text' }
+    let input = { url: 'https://www.lipsum.com/', question: 'Summarize this text' }
     const result = await graph.invoke(input)
 
     return result.answer

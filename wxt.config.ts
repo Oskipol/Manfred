@@ -7,7 +7,8 @@ export default defineConfig({
     permissions: [
       'activeTab',
       'tabs',
-      'storage'
+      'storage',
+      'scripting'
     ],
     host_permissions: [
       '<all_urls>'
