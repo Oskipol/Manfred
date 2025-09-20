@@ -16,7 +16,12 @@ export default defineConfig({
 
   vite: () => ({
     define: {
-      'import.meta.env.API_KEY': JSON.stringify(process.env.API_KEY),
-    }
+      global: 'globalThis',
+    },
+    resolve: {
+      alias: {
+        'node:async_hooks': new URL('./lib/async-hooks.ts', import.meta.url).pathname,
+      }
+    },
   })
 });
