@@ -4,6 +4,8 @@ import { PiSpeakerLowFill } from "react-icons/pi";
 import Changemode from '@/elements/changemode';
 import Fiszki from '@/elements/fiszki';
 import Roadmapa from '@/elements/roadmapa';
+import { playOpenAITTS } from '@/utils/tts';
+
 function App() {
   const [text, setText]=useState("Tutaj pojawi się streszczenie");
   const [isHidden, setIsHidden] = useState(true);
@@ -105,7 +107,7 @@ function App() {
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Pojedynczy klik na głośnik");
+    playOpenAITTS(text, "alloy");
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
