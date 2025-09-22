@@ -54,6 +54,11 @@
 }
 #opis{
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 70px;
+  align-items: center;
+  justify-content: center;
   margin-top: 10px;
   height: 100%;
   background-color: var(--darkest);
@@ -140,26 +145,31 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: .3s;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: bold !important;
   cursor: pointer;
 }
 
 .przycisk:hover{
   background-color: var(--darkest);
   color: var(--light);
-  transition: .3s;
+  transform: scale(1.05);
 }
 .wybor{
   width: 100%;
   display: flex;
-  justify-content: start;
+  justify-content: center;
   margin-left: 20px;
+  margin-right: 20px;
   align-items: center;
 }
 .przyciski{
   width: 100%;
   height: 100%;
+  display: flex;
+  margin-top: 30px;
+  justify-content: center;
 }
 #type{
   width: 180px;
@@ -177,7 +187,7 @@
 
 #type option {
   background-color: var(--dark);
-  color: var(--light);
+  color: var(--lightest);
   font-weight: bold;
 }
 
@@ -192,11 +202,12 @@
   height: auto;
   background-color: var(--dark);
   border-radius: 25px;
-  margin-top: 50px;
+  margin-top: 0px;
   margin-left: auto;
   margin-right: auto;
   text-align: justify;
   padding: 5px 10px;
+  border: var(--light) solid 3px;
   margin-bottom: 10px;
   color: var(--lightest);
   position: relative;
@@ -283,20 +294,44 @@
 .slider-container {
   width: 150px;
   position: relative;
-  
+  margin-top: 20px;
+  color: var(--lightest);
+}
+.roboto{
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
 }
 .length-slider{
+  -webkit-appearance: none;
+  border-radius: 25px;
+  width: 150px;
+  height: 10px;
+  cursor: pointer;
   background: var(--dark);
 }
-input[type="range"] {
+.length-slider::-moz-range-progress{
+  background-color: var(--light);
+  height: 10px;
+  border-radius: 25px;
+}
+.length-slider::-webkit-slider-runnable-track{
+  background: linear-gradient(to right, var(--light) 0%, var(--light) var(--slider-value), var(--dark) var(--slider-value), var(--dark) 100%);
+  height: 10px;
+  border: var(--lightest) solid 1px;
+  border-radius: 25px;
+}
+.length-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 100%;
-  height: 8px;
-  border-radius: 5px;
-  background: var(--dark);
-  color: var(--lightest);
-  outline: none;
-  opacity: 0.7;
-  transition: opacity .2s;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: var(--light);
+  border: var(--lightest) solid 1px;
+  margin-top: -3px;
+  border-radius: 50%;
   cursor: pointer;
 }

@@ -11,13 +11,15 @@ function App() {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [Mymodel, setMymodel] = useState("casual_eng");
   const [summaryLength, setSummaryLength] = useState(0);
+  const slider =document.querySelector('.length-slider');
+  const [znajdz, setZnajdz]=useState(false);
 
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
     return savedVolume ? parseInt(savedVolume) : 50;
   });
  const snapToNearest = (value: number) => {
-    if (value <= 33) return 0;
+    if (value <= 33) { return 0;}
     if (value <= 66) return 1;
     return 2;
   };
@@ -44,6 +46,7 @@ function App() {
   const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     const snappedValue = snapToNearest(value);
+    (slider as HTMLElement)?.style.setProperty('--slider-value', snappedValue*50 +"%");
     setSummaryLength(snappedValue);
   };
 
@@ -105,7 +108,7 @@ function App() {
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Pojedynczy klik na głośnik");
+    console.log("click");
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,13 +122,29 @@ function App() {
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
       chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
         (response)=>{
-          chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength)},
-            (res)=> setText(res)
+          chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: znajdz },
+            (res)=> {
+              setText(res);
+              setZnajdz(false);
+            }
           );
+          
 
         }
       )
     });
+    }
+    
+    const znajdzPodobne = () => {
+      chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
+        chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
+          (response)=>{
+            chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: true },
+              (res)=> {res}
+            );
+          }
+        )
+      });
     }
     const przycisk2=()=>{
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
@@ -143,9 +162,9 @@ function App() {
   return (
     <>
         <div className='nav'>
-        <div className='tabs' onClick={pokazRoadmap}>RoadMapa</div>
-        <div className='tabs' id='desc' onClick={pokazOpis}>OPIS</div>
-        <div className='tabs' onClick={pokazFiszki}>FISZKI</div>
+        <div className='tabs roboto' onClick={pokazRoadmap}>RoadMapa</div>
+        <div className='tabs roboto' id='desc' onClick={pokazOpis}>OPIS</div>
+        <div className='tabs roboto' onClick={pokazFiszki}>FISZKI</div>
         </div>
         <div style={{scale:0.7, position:"absolute", right: "0"}}><Changemode /></div>
         <div id='opis'>
@@ -155,11 +174,11 @@ function App() {
             value={Mymodel}
             onChange={(e) => setMymodel(e.target.value)}
           >
-            <option value="casual_eng" disabled >Wybierz model</option>
-            <option value="prof_eng">Professional English</option>
-            <option value="prof_pl">Professional Polish</option>
-            <option value="casual_eng">Casual English</option>
-            <option value="casual_pl">Casual Polish</option>
+            <option className='roboto' value="casual_eng" disabled >Wybierz model</option>
+            <option className='roboto' value="prof_eng">Professional English</option>
+            <option className='roboto' value="prof_pl">Professional Polish</option>
+            <option className='roboto' value="casual_eng">Casual English</option>
+            <option className='roboto' value="casual_pl">Casual Polish</option>
           </select>
           
           </div>
@@ -176,11 +195,11 @@ function App() {
           </div>
           
           <div className='przyciski'>
-        <button className='przycisk' onClick={przycisk}>Streść Całość</button>
-        <button className='przycisk' onClick={przycisk2}>Streść Zaznaczone</button>
+        <button className='przycisk roboto' onClick={przycisk}>Streść Całość</button>
+        <button className='przycisk roboto' onClick={przycisk2}>Streść Zaznaczone</button>
           </div>
         </div>
-        <div className='tekst'>
+        <div className='tekst roboto'>
         {text}
         <div className='speaker-container'>
           <PiSpeakerLowFill 
@@ -205,7 +224,7 @@ function App() {
           )}
         </div>
       </div>
-          <div className='znajdz'><button style={{width: "70%"}} className='przycisk'>Znajdź podobne</button></div>
+          <div className='znajdz'><button style={{width: "70%"}} onClick={znajdzPodobne} className='przycisk roboto'>Znajdź podobne</button></div>
         <div id='fiszki' className={isHidden ? 'ukryj' : 'pokaz'}>
         <Fiszki />
         </div>

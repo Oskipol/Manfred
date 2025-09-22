@@ -15,11 +15,17 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "axios": "^1.12.2",
+    "fs": "^0.0.1-security",
     "googleapis": "^159.0.0",
     "langchain": "^0.3.34",
+    "openai": "^5.22.0",
+    "pathlib": "^0.1.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "vocalize": "^0.0.1",
+    "vocalize.ts": "^1.2.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.1.6",
