@@ -1,6 +1,6 @@
 
 export async function playOpenAITTS(text: string, voice: string = "onyx") {
-  const apiKey = import.meta.env.API_KEY; // lub pobierz z background
+  const apiKey = import.meta.env.API_KEY;
   const response = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: {
@@ -8,9 +8,13 @@ export async function playOpenAITTS(text: string, voice: string = "onyx") {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "tts-1",
+      model: "gpt-4o-mini-tts",
       input: text,
       voice,
+
+    // ? Macie tutaj pole do popisu instructions jest ala promptem dla tts
+    //instructions: "",
+
       response_format: "mp3"
     })
   });
