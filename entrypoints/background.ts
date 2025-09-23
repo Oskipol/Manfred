@@ -1,6 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import models from "./modele";
+import { api_key } from "@/api";
+import { summarizeWeb } from "./backgroundAI/summarizeWeb";
 
 export default defineBackground(() => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -11,7 +13,7 @@ export default defineBackground(() => {
         try {
           const model = new ChatOpenAI({
             model: dane?.id || "gpt-4o-mini", 
-            apiKey: import.meta.env.API_KEY,
+            apiKey: api_key,
             temperature: dane?.temperature || 1,
           });
           const chatPrompt = ChatPromptTemplate.fromMessages([
@@ -21,10 +23,10 @@ export default defineBackground(() => {
               `${dane?.prompt || "Summarize the following webpage in a lively, creative, and easy-to-read way. - Length: • Short → 1–2 punchy sentences with a hook.  - Make it engaging, not dry.  - Use a storytelling tone that captures the reader’s attention.  - Highlight the most important insights while keeping the language simple and memorable.  "} ${dane?.[dl] || ""} ${dane?.prompt2 || ""} {website}`
             ]
           ]);
-          const promptValue = await chatPrompt.invoke({ website: message.tekst });
-          const response = await model.invoke(promptValue);
-          
-          sendResponse(response.content);
+          const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+          const currentUrl = tabs[0]?.url;
+          const response = await summarizeWeb(currentUrl, model, chatPrompt)
+          sendResponse(response);
         } catch (error) {
           console.error('Błąd AI:', error);
           sendResponse(`Błąd: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);

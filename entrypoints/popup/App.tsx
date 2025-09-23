@@ -13,6 +13,7 @@ function App() {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [Mymodel, setMymodel] = useState("casual_eng");
   const [summaryLength, setSummaryLength] = useState(0);
+  const [sessionId, setSessionId] = useState<string>('');
 
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
@@ -48,6 +49,11 @@ function App() {
     const snappedValue = snapToNearest(value);
     setSummaryLength(snappedValue);
   };
+
+  useEffect(() => {
+    const id = Date.now().toString();
+    setSessionId(id);
+  })
 
   useEffect(() => {
     localStorage.setItem('summaryLength', summaryLength.toString());
