@@ -7,10 +7,10 @@
 }
 
 :root{
-  --darkest: #222831;
+  --darkest: #181c23;
   --dark: #393E46;
-  --light: #948979;
-  --lightest: #DFD0B8;
+  --light: #b0f358;
+  --lightest: #80ff01;
 }
 
 .dark{
@@ -279,4 +279,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.footer-line{
+  border: none;
+  border-top: 1.5px solid var(--lightest);
+}
+
+.footer-version{
+  color: var(--lightest);
+  font-size: 13px ;
+  letter-spacing: 1px;
+  margin-right: 10px;
+  text-align: right;
 }

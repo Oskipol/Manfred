@@ -168,14 +168,17 @@ function App() {
         </div>
       </div>
           <div className='znajdz'><button style={{width: "70%"}} className='przycisk'>Znajdź podobne</button></div>
-
+          
         <div id='fiszki' className={isHidden ? 'ukryj' : 'pokaz'}>
         <Fiszki />
         </div>
         <div id='roadmap' className={isRoad ? 'ukryj2' : 'pokaz2'}>
         < Roadmapa />
         </div>
-
+      <div className='footer'>
+        <hr className='footer-line'/>
+        <div className='footer-version'>version 1.0.0</div>
+      </div>
     </>
   );
 }
