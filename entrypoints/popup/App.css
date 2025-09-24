@@ -849,7 +849,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  aspect-ratio: 1git ;
+  aspect-ratio: 1;
   border: 3px solid var(--light);
   border-radius: 50%;
   border-top-color: var(--lightest);
