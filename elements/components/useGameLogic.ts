@@ -137,21 +137,38 @@ export const useGameLogic = () => {
     }
   };
 
-  const getfiszki1=()=>{
-    chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
-      chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
-        (response)=>{
-          chrome.runtime.sendMessage({type: "fisz", tekst: response},
-            (res)=> {
-              setFiszkiText(res);
-            }
-          );
-          
-
+  const getfiszki1 = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
+        if (!tabs[0]?.id) {
+          reject(new Error('Nie można uzyskać dostępu do aktywnej karty'));
+          return;
         }
-      )
+        chrome.tabs.sendMessage(tabs[0].id,{type: "tekscik"},
+          (response)=>{
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            chrome.runtime.sendMessage({type: "fisz", tekst: response},
+              (res)=> {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                  return;
+                }
+                if (res) {
+                  setFiszkiText(res);
+                  resolve();
+                } else {
+                  reject(new Error('Nie otrzymano odpowiedzi z serwera'));
+                }
+              }
+            );
+          }
+        )
+      });
     });
-    }
+  }
 
   const deleteSave = async (index: number) => {
     try {

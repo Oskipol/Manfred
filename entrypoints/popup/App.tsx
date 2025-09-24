@@ -13,6 +13,8 @@ function App() {
   const [summaryLength, setSummaryLength] = useState(0);
   const slider =document.querySelector('.length-slider');
   const [znajdz, setZnajdz]=useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFindingLoading, setIsFindingLoading] = useState(false);
 
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
@@ -119,6 +121,7 @@ function App() {
     e.stopPropagation();
   };
   const przycisk=()=>{
+    setIsLoading(true);
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
       chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
         (response)=>{
@@ -126,6 +129,7 @@ function App() {
             (res)=> {
               setText(res);
               setZnajdz(false);
+              setIsLoading(false);
             }
           );
           
@@ -136,22 +140,30 @@ function App() {
     }
     
     const znajdzPodobne = () => {
+      setIsFindingLoading(true);
       chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
         chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
           (response)=>{
             chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: true },
-              (res)=> {setText(res);}
+              (res)=> {
+                setText(res);
+                setIsFindingLoading(false);
+              }
             );
           }
         )
       });
     }
     const przycisk2=()=>{
+    setIsLoading(true);
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
       chrome.tabs.sendMessage(tabs[0].id!, {type: "tekscik2"},
         (response)=>{
           chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: znajdz},
-            (res)=> setText(res)
+            (res)=> {
+              setText(res);
+              setIsLoading(false);
+            }
           );
 
         }
@@ -195,8 +207,14 @@ function App() {
           </div>
           
           <div className='przyciski'>
-        <button className='przycisk roboto' onClick={przycisk}>Streść Całość</button>
-        <button className='przycisk roboto' onClick={przycisk2}>Streść Zaznaczone</button>
+        <button className={`przycisk roboto ${isLoading ? 'button-loading' : ''}`} onClick={przycisk} disabled={isLoading}>
+          {isLoading && <span className="loading-spinner"></span>}
+          Streść Całość
+        </button>
+        <button className={`przycisk roboto ${isLoading ? 'button-loading' : ''}`} onClick={przycisk2} disabled={isLoading}>
+          {isLoading && <span className="loading-spinner"></span>}
+          Streść Zaznaczone
+        </button>
           </div>
         </div>
         <div className='tekst roboto'>
@@ -224,7 +242,17 @@ function App() {
           )}
         </div>
       </div>
-          <div className='znajdz'><button style={{width: "70%"}} onClick={znajdzPodobne} className='przycisk roboto'>Znajdź podobne</button></div>
+          <div className='znajdz'>
+            <button 
+              style={{width: "70%"}} 
+              onClick={znajdzPodobne} 
+              className={`przycisk roboto ${isFindingLoading ? 'button-loading' : ''}`}
+              disabled={isFindingLoading}
+            >
+              {isFindingLoading && <span className="loading-spinner"></span>}
+              Znajdź podobne
+            </button>
+          </div>
         <div id='fiszki' className={isHidden ? 'ukryj' : 'pokaz'}>
         <Fiszki />
         </div>

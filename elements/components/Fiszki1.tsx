@@ -5,7 +5,7 @@ import FiszkaFeedback from './FiszkaFeedback';
 interface Fiszki1Props {
   fiszkiText: string;
   setFiszkiText: (text: string) => void;
-  getfiszki1: () => void;
+  getfiszki1: () => Promise<void>;
   Powrot: () => void;
   setObecne: (num: number) => void;
   setLos: (los: number[]) => void;
@@ -18,6 +18,8 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, 
   const [feedback, setFeedback] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [pendingQuestionChange, setPendingQuestionChange] = useState<(() => void) | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
 
   const showFiszkaFeedback = (message: string, isCorrect: boolean, onNext?: () => void) => {
     setFeedback(`${isCorrect ? '1' : '0'};${message}`);
@@ -32,6 +34,18 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, 
     if (pendingQuestionChange) {
       pendingQuestionChange();
       setPendingQuestionChange(null);
+    }
+  };
+
+  const handleGenerateQuiz = async () => {
+    setIsGenerating(true);
+    try {
+      await getfiszki1();
+    } catch (error) {
+      console.error('Błąd podczas generowania quiz:', error);
+      showFiszkaFeedback('Błąd podczas generowania quiz. Spróbuj ponownie.', false);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -129,10 +143,15 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, 
   const handleOtwarte=(odpowiedz:string)=>{
     const pytanie = otwarte[los[Obecne]-7];
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
-      chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
+        chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
         (response)=>{
           chrome.runtime.sendMessage({type: "sprawdz", tekst: response, pytanie: pytanie, odpowiedz: odpowiedz },
             async(res)=> {
+              setIsCheckingAnswer(false);
+              if (!res) {
+                showFiszkaFeedback('Błąd podczas sprawdzania odpowiedzi. Spróbuj ponownie.', false);
+                return;
+              }
               const odp=res.split(";");
               if(odp[0]==="1"){ 
                 const nextQuestion = async () => {
@@ -157,17 +176,21 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, 
               }
             }
           );
-          
-
         }
       )
     });
     }
   return (
     <div className='fiszki1'>
-        {!fiszkiText&&(
-            <button className='przycisk' onClick={() => {getfiszki1()}}>Generuj Quiz</button>
-            )}
+        {!fiszkiText && !isGenerating && (
+            <button className='przycisk' onClick={handleGenerateQuiz}>Generuj Quiz</button>
+        )}
+        {isGenerating && (
+            <div className="fiszki-loading">
+                <div className="loading-spinner"></div>
+                <div className="loading-text">Generuję quiz...</div>
+            </div>
+        )}
         {fiszkiText&&(
             <div>
 
@@ -185,14 +208,22 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, 
                  <div className='otwarte roboto'>
                  <h3 className='roboto'>{String(otwarte[los[Obecne]-7])}</h3>
                   <input className='input-odpowiedz' type="text" placeholder='Twoja odpowiedź' id='odpowiedz'/>
-                  <button className='przycisk' onClick={() => {
-                    const input = document.getElementById('odpowiedz') as HTMLInputElement | null;
-                    if (input) {
-                      handleOtwarte(input.value);
-                    } else {
-                      showFiszkaFeedback('Nie znaleziono pola odpowiedzi.', false);
-                    }
-                  }}>Sprawdź</button>
+                  <button 
+                    className={`przycisk ${isCheckingAnswer ? 'button-loading' : ''}`} 
+                    onClick={() => {
+                      const input = document.getElementById('odpowiedz') as HTMLInputElement | null;
+                      if (input) {
+                        setIsCheckingAnswer(true);
+                        handleOtwarte(input.value);
+                      } else {
+                        showFiszkaFeedback('Nie znaleziono pola odpowiedzi.', false);
+                      }
+                    }}
+                    disabled={isCheckingAnswer}
+                  >
+                    {isCheckingAnswer && <span className="loading-spinner"></span>}
+                    Sprawdź
+                  </button>
                  </div>
                )}
  
