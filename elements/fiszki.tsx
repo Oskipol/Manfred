@@ -1,30 +1,91 @@
-import React from 'react'
-
+import React from 'react';
+import GameHeader from './components/GameHeader';
+import ErrorMessage from './components/ErrorMessage';
+import LoadingScreen from './components/LoadingScreen';
+import StartMenu from './components/StartMenu';
+import SavedGames from './components/SavedGames';
+import Fiszki1 from './components/Fiszki1';
+import StoryContent from './components/StoryContent';
+import GameChoices from './components/GameChoices';
+import GameHistory from './components/GameHistory';
+import { useGameLogic } from './components/useGameLogic';
 
 const Fiszki = () => {
-  const [fisz, setfisz]=React.useState("cos")
-  const przycisk2=()=>{
-    chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
-      chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
-        (response)=>{
-          chrome.runtime.sendMessage({type: "generateImage", prompt: response},
-            (res)=> setfisz(res)
-          );
+  const {
+    fiszkiText,
+    gameState,
+    isLoading,
+    error,
+    savedGames,
+    showSaves,
+    fiszki1,
+    Obecne,
+    los,
+    setObecne,
+    setLos,
+    setShowSaves,
+    getfiszki1,
+    setFiszkiText,
+    setFiszki1,
+    loadGame,
+    deleteSave,
+    startStory,
+    makeChoice,
+    resetGame,
+    getChoiceColor,
+    saveGame,
+    handleReturnToMenu
+  } = useGameLogic();
 
-        }
-      )
-    });
-    }
+
+
+
   return (
     <div className='fisz'>
-      <button className='przycisk' onClick={przycisk2}>Generuj fiszki ze wszystkiego</button>
-      <button className='przycisk' onClick={przycisk2}>Generuj fiszki z zaznaczonego</button>
-      <button className='przycisk' onClick={przycisk2}>Importuj</button>
-      <button className='przycisk' onClick={przycisk2}>Eksportuj</button>
-      {fisz}
-    
-    </div>
-  )
-}
+      <GameHeader gameState={gameState} />
+      <ErrorMessage error={error} />
 
-export default Fiszki
+      {!gameState.currentStory && !isLoading && !fiszki1 && (
+        <>
+          <StartMenu 
+            onStartFiszki={() => setFiszki1(true)}
+            onStartStory={startStory}
+          />
+          <SavedGames
+            savedGames={savedGames}
+            showSaves={showSaves}
+            onToggleSaves={() => setShowSaves(!showSaves)}
+            onLoadGame={loadGame}
+            onDeleteSave={deleteSave}
+          />
+        </>
+      )}
+
+      {isLoading && <LoadingScreen />}
+
+      {fiszki1 && <Fiszki1 fiszkiText={fiszkiText} setFiszkiText={setFiszkiText} getfiszki1={getfiszki1} setObecne={setObecne} setLos={setLos} los={los} Obecne={Obecne} />}
+
+      {gameState.currentStory && (
+        <div className="story-section">
+          <StoryContent
+            gameState={gameState}
+            onSaveGame={saveGame}
+            onReturnToMenu={handleReturnToMenu}
+          />
+          
+          <GameChoices
+            gameState={gameState}
+            isLoading={isLoading}
+            onMakeChoice={makeChoice}
+            getChoiceColor={getChoiceColor}
+            onResetGame={resetGame}
+          />
+
+          <GameHistory gameState={gameState} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Fiszki;

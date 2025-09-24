@@ -9,7 +9,7 @@ function App() {
   const [isHidden, setIsHidden] = useState(true);
   const [isRoad, setIsRoad] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [Mymodel, setMymodel] = useState("casual_eng");
+  const [Mymodel, setMymodel] = useState("");
   const [summaryLength, setSummaryLength] = useState(0);
   const slider =document.querySelector('.length-slider');
   const [znajdz, setZnajdz]=useState(false);
@@ -140,7 +140,7 @@ function App() {
         chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
           (response)=>{
             chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: true },
-              (res)=> {res}
+              (res)=> {setText(res);}
             );
           }
         )
@@ -150,7 +150,7 @@ function App() {
     chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
       chrome.tabs.sendMessage(tabs[0].id!, {type: "tekscik2"},
         (response)=>{
-          chrome.runtime.sendMessage({type: "ustaw", tekst: response},
+          chrome.runtime.sendMessage({type: "ustaw", tekst: response, Mymodel: Mymodel, ll: getLengthKey(summaryLength), znajdz: znajdz},
             (res)=> setText(res)
           );
 
@@ -174,7 +174,7 @@ function App() {
             value={Mymodel}
             onChange={(e) => setMymodel(e.target.value)}
           >
-            <option className='roboto' value="casual_eng" disabled >Wybierz model</option>
+            <option className='roboto' value="" disabled >Wybierz model</option>
             <option className='roboto' value="prof_eng">Professional English</option>
             <option className='roboto' value="prof_pl">Professional Polish</option>
             <option className='roboto' value="casual_eng">Casual English</option>
