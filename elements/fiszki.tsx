@@ -22,6 +22,7 @@ const Fiszki = () => {
     Obecne,
     los,
     setObecne,
+    Powrot,
     setLos,
     setShowSaves,
     getfiszki1,
@@ -34,6 +35,7 @@ const Fiszki = () => {
     resetGame,
     getChoiceColor,
     saveGame,
+    dodajpkt,
     handleReturnToMenu
   } = useGameLogic();
 
@@ -63,7 +65,7 @@ const Fiszki = () => {
 
       {isLoading && <LoadingScreen />}
 
-      {fiszki1 && <Fiszki1 fiszkiText={fiszkiText} setFiszkiText={setFiszkiText} getfiszki1={getfiszki1} setObecne={setObecne} setLos={setLos} los={los} Obecne={Obecne} />}
+      {fiszki1 && <Fiszki1 dodajpkt={dodajpkt} Powrot={Powrot} fiszkiText={fiszkiText} setFiszkiText={setFiszkiText} getfiszki1={getfiszki1} setObecne={setObecne} setLos={setLos} los={los} Obecne={Obecne} />}
 
       {gameState.currentStory && (
         <div className="story-section">

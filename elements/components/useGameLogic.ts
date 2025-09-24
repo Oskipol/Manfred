@@ -13,7 +13,7 @@ export const useGameLogic = () => {
     imageUrl: ""
   });
   const [Obecne, setObecne] = useState(0);
-  const [los, setLos] = useState<number[]>([0,1,2,3,4,5,6]);
+  const [los, setLos] = useState<number[]>([0,1,2,3,4,5,6,7,8,9]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
@@ -341,6 +341,10 @@ export const useGameLogic = () => {
     setIsLoading(false); 
     setGameState(prev => ({ ...prev, currentStory: undefined }));
   };
+  const Powrot=()=>{
+    setFiszki1(false);
+    setFiszkiText("");
+  }
 
   return {
     fiszkiText,
@@ -365,6 +369,7 @@ export const useGameLogic = () => {
     makeChoice,
     resetGame,
     getChoiceColor,
+    Powrot,
     saveGame,
     handleReturnToMenu,
     dodajpkt

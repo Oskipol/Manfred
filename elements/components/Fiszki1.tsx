@@ -1,18 +1,39 @@
 import { get } from 'http';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import FiszkaFeedback from './FiszkaFeedback';
 
 interface Fiszki1Props {
   fiszkiText: string;
   setFiszkiText: (text: string) => void;
   getfiszki1: () => void;
-    setObecne: (num: number) => void;
-    setLos: (los: number[]) => void;
-    los: number[];
-    Obecne: number;
+  Powrot: () => void;
+  setObecne: (num: number) => void;
+  setLos: (los: number[]) => void;
+  dodajpkt: () => void;
+  los: number[];
+  Obecne: number;
 }
 
-const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, setFiszkiText, getfiszki1, setObecne, setLos, los, Obecne }) => {
-  
+const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, dodajpkt, setFiszkiText, getfiszki1, setObecne, setLos, los, Obecne, Powrot }) => {
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [pendingQuestionChange, setPendingQuestionChange] = useState<(() => void) | null>(null);
+
+  const showFiszkaFeedback = (message: string, isCorrect: boolean, onNext?: () => void) => {
+    setFeedback(`${isCorrect ? '1' : '0'};${message}`);
+    setShowFeedback(true);
+    if (onNext) {
+      setPendingQuestionChange(() => onNext);
+    }
+  };
+
+  const closeFeedback = () => {
+    setShowFeedback(false);
+    if (pendingQuestionChange) {
+      pendingQuestionChange();
+      setPendingQuestionChange(null);
+    }
+  };
 
   const { zamkniete, otwarte, odpowiedziA, odpowiedziB, odpowiedziC, odpowiedziD, poprawne } = useMemo(() => {
     if (!fiszkiText || fiszkiText === "Gotowy?") {
@@ -81,23 +102,67 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, setFiszkiText, getfiszki1
     }
   }, [fiszkiText]);
   
-  const wylosowanePytania = ()=>{
-    if(los.length>1)return Math.floor(Math.random() * (los.length-1));
-    else return 0;
-  }
+
   const handleZamkniete=async (odpowiedz:string)=>{
     if(odpowiedz===poprawne[los[Obecne]]){
-        alert("Dobra odpowiedź");
-        const newLos = [...los];
-        newLos.splice(Obecne,1);
-        await setLos(newLos);
-        setObecne(wylosowanePytania());
-        console.log(los);
-        console.log(Obecne);
-        console.log(los[Obecne]);
+        const nextQuestion = async () => {
+          const newLos = [...los];
+          newLos.splice(Obecne,1);
+          await setLos(newLos);
+          
+          if(newLos.length === 0) {
+            dodajpkt();
+            Powrot();
+          } else {
+            setObecne(Math.floor(Math.random() * newLos.length));
+          }
+        };
+        showFiszkaFeedback("Dobra odpowiedź", true, nextQuestion);
     }
-    else {alert("Zła odpowiedź. Spróbuj ponownie."); setObecne(wylosowanePytania());}
+    else {
+        const nextQuestion = () => {
+          setObecne(Math.floor(Math.random() * los.length));
+        };
+        showFiszkaFeedback("Zła odpowiedź. Spróbuj ponownie.", false, nextQuestion);
+    }
   }
+  const handleOtwarte=(odpowiedz:string)=>{
+    const pytanie = otwarte[los[Obecne]-7];
+    chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
+      chrome.tabs.sendMessage(tabs[0].id!,{type: "tekscik"},
+        (response)=>{
+          chrome.runtime.sendMessage({type: "sprawdz", tekst: response, pytanie: pytanie, odpowiedz: odpowiedz },
+            async(res)=> {
+              const odp=res.split(";");
+              if(odp[0]==="1"){ 
+                const nextQuestion = async () => {
+                  const newLos = [...los];
+                  newLos.splice(Obecne,1);
+                  await setLos(newLos);
+                  
+                  if(newLos.length === 0) {
+                    dodajpkt();
+                    Powrot();
+                  } else {
+                    setObecne(Math.floor(Math.random() * newLos.length));
+                  }
+                };
+                showFiszkaFeedback(odp[1] || "Dobra odpowiedź!", true, nextQuestion);
+              }
+              else {
+                const nextQuestion = () => {
+                  setObecne(Math.floor(Math.random() * los.length));
+                };
+                showFiszkaFeedback(odp[1] || "Zła odpowiedź", false, nextQuestion);
+              }
+            }
+          );
+          
+
+        }
+      )
+    });
+    }
   return (
     <div className='fiszki1'>
         {!fiszkiText&&(
@@ -108,21 +173,38 @@ const Fiszki1: React.FC<Fiszki1Props> = ({ fiszkiText, setFiszkiText, getfiszki1
 
                {los[Obecne] < 7 ? (
                     <div>
-                        <h3>{String(zamkniete[los[Obecne]])}</h3>
+                        <h3 className='roboto'>{String(zamkniete[los[Obecne]])}</h3>
+                        <div className='odd'>
                         <p onClick={() => handleZamkniete('A')}>{String(odpowiedziA[los[Obecne]])}</p>
                         <p onClick={() => handleZamkniete('B')}>{String(odpowiedziB[los[Obecne]])}</p>
                         <p onClick={() => handleZamkniete('C')}>{String(odpowiedziC[los[Obecne]])}</p>
                         <p onClick={() => handleZamkniete('D')}>{String(odpowiedziD[los[Obecne]])}</p>
+                        </div>
                     </div>
                ) : (
-                 <span>Pytanie otwarte</span>
+                 <div className='otwarte roboto'>
+                 <h3 className='roboto'>{String(otwarte[los[Obecne]-7])}</h3>
+                  <input className='input-odpowiedz' type="text" placeholder='Twoja odpowiedź' id='odpowiedz'/>
+                  <button className='przycisk' onClick={() => {
+                    const input = document.getElementById('odpowiedz') as HTMLInputElement | null;
+                    if (input) {
+                      handleOtwarte(input.value);
+                    } else {
+                      showFiszkaFeedback('Nie znaleziono pola odpowiedzi.', false);
+                    }
+                  }}>Sprawdź</button>
+                 </div>
                )}
  
             </div>
         )}
       
-      
-      
+      <FiszkaFeedback 
+        feedback={feedback}
+        isVisible={showFeedback}
+        onClose={closeFeedback}
+      />
+<button onClick={Powrot} className='przycisk powroty'>Powrót do menu</button>
     </div>
   );
 };

@@ -335,6 +335,27 @@
   border-radius: 50%;
   cursor: pointer;
 }
+.otwarte{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.input-odpowiedz{
+  width: 90%;
+  min-height: 50px;
+  height: auto;
+  background-color: var(--dark);
+  border-radius: 25px;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: justify;
+  padding: 5px 10px;
+  border: var(--light) solid 3px;
+  margin-bottom: 10px;
+  color: var(--lightest);
+  position: relative;
+}
 
 .fisz {
   overflow-y: auto;
@@ -748,7 +769,37 @@
   align-items: center;
   gap: 10px;
 }
-
+.fiszka-feedback{
+  width: 90%;
+  background: var(--darkest);
+  padding: 10px;
+  border: 2px solid var(--light);
+  border-radius: 10px;
+  color: var(--lightest);
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  min-height: 200px;
+  transform: translate(-50%, -30%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.feedback-close{
+  height: 40px !important;
+  font-size: 30px !important;
+  color: black !important;
+  width: 70px !important;
+}
+.powroty{
+  position: absolute;
+  bottom: 10px;
+  width: 40%;
+  font-size: 12px !important;
+  height: 30px !important;
+  border-radius: 15px !important;
+}
 .save-game-button {
   background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
   color: white;
@@ -767,4 +818,29 @@
 .save-game-button:hover {
   transform: scale(1.1);
   box-shadow: 0 2px 4px rgba(243, 156, 18, 0.3);
+}
+.odd p{
+ cursor: pointer; 
+ font-weight: normal;
+ width: 90%;
+ border: 2px solid var(--light);
+ padding: 5px;
+ border-radius: 10px;
+ position: relative;
+}
+.odd p::after{
+  width: 0;
+  height: 100%;
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  background-color: var(--light);
+  z-index: -1;
+}
+.odd p:hover::after{
+  width: 101%;
+  transition: .3s;
+  border-radius: 10px;
 }

@@ -39,6 +39,89 @@ export default defineBackground(() => {
       
       return true; 
     }
+    if(message.type==="sprawdz"){
+      (async () => {
+        try {
+          const model = new ChatOpenAI({
+            model: "gpt-4o-mini", 
+            apiKey: import.meta.env.API_KEY,
+            temperature: 0.1, // Niska temperatura dla konsystentnych wyników
+          });
+          
+          const prompt = ChatPromptTemplate.fromMessages([
+            ["system", `Jesteś ekspertem w ocenianiu odpowiedzi na pytania otwarte. Musisz zwrócić KONKRETNĄ odpowiedź, nie placeholder.
+
+ALGORYTM OCENIANIA:
+1. Sprawdź czy odpowiedź użytkownika zawiera kluczowe informacje z tekstu źródłowego
+2. Uwzględnij synonimy, parafrazy i różne sposoby wyrażania tej samej myśli  
+3. Oceń czy sens odpowiedzi jest zgodny z tekstem źródłowym
+4. Toleruj drobne błędy językowe i stylistyczne
+5. Akceptuj częściowo poprawne odpowiedzi (minimum 70% poprawności)
+
+FORMAT ODPOWIEDZI (OBOWIĄZKOWY):
+- Jeśli odpowiedź jest poprawna/częściowo poprawna: "1;Świetnie! [konkretny pozytywny komentarz]"
+- Jeśli odpowiedź jest błędna: "0;[tutaj wpisz pełną, prawidłową odpowiedź na podstawie tekstu źródłowego bez znaku ;]"
+
+PRZYKŁADY POPRAWNYCH ODPOWIEDZI:
+- "1;Świetnie! Prawidłowo wskazałeś że Warszawa jest stolicą Polski."
+- "0;Prawidłowa odpowiedź to: Warszawa jest stolicą Polski od 1596 roku i liczy około 1,8 miliona mieszkańców."
+
+NIGDY nie używaj placeholderów jak "POPRAWNA_ODPOWIEDŹ" - zawsze wpisz rzeczywistą odpowiedź!`],
+            ["user", `Sprawdź tę odpowiedź:
+
+PYTANIE: ${message.pytanie}
+ODPOWIEDŹ UŻYTKOWNIKA: "${message.odpowiedz}"
+
+Na podstawie tego tekstu źródłowego:
+${message.tekst}
+
+Zwróć ocenę w wymaganym formacie z KONKRETNĄ odpowiedzią:`]
+          ]);
+          
+          const promptValue = await prompt.invoke({});
+          const response = await model.invoke(promptValue);
+          
+          let result = response.content.toString().trim();
+          
+          if (!result.match(/^[01];/)) {
+            if (result.toLowerCase().includes('poprawna') || result.toLowerCase().includes('dobra')) {
+              result = `1;${result}`;
+            } else {
+              result = `0;${result}`;
+            }
+          }
+          
+          const parts = result.split(';', 2);
+          if (parts.length > 1) {
+            const feedback = parts[1];
+          if (feedback.includes('POPRAWNA_ODPOWIEDŹ') || 
+                feedback.includes('FEEDBACK_DLA_UŻYTKOWNIKA') ||
+                feedback.includes('[') && feedback.includes(']')) {
+              
+          if (parts[0] === '1') {
+                result = '1;Odpowiedź została zaakceptowana.';
+              } else {
+                const shortAnswer = message.tekst.substring(0, 150) + '...';
+                result = `0;Na podstawie tekstu: ${shortAnswer}`;
+              }
+            }
+          }
+          
+          const finalParts = result.split(';');
+          if (finalParts.length > 1 && finalParts[1].length > 200) {
+            finalParts[1] = finalParts[1].substring(0, 197) + '...';
+            result = finalParts.join(';');
+          }
+          
+          sendResponse(result);
+        } catch (error) {
+          console.error('Błąd w przetwarzaniu wiadomości "sprawdz":', error);
+          sendResponse("0,Wystąpił błąd podczas sprawdzania odpowiedzi. Spróbuj ponownie.");
+        }
+      })();
+
+      return true;
+    }
     if(message.type==="fisz") {
       (async () => {
         try{
@@ -71,7 +154,6 @@ export default defineBackground(() => {
             
             
             const storyData1 = JSON.parse(cleanedContent);
-            console.log(cleanedContent);
             sendResponse(cleanedContent);
             
           } catch (parseError) {
