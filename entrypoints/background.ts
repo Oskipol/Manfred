@@ -1,7 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import models from "./modele";
-import { api_key } from "@/api";
 import { summarizeWeb } from "./backgroundAI/summarizeWeb";
 
 export default defineBackground(() => {
@@ -13,7 +12,7 @@ export default defineBackground(() => {
         try {
           const model = new ChatOpenAI({
             model: dane?.id || "gpt-4o-mini", 
-            apiKey: api_key,
+            apiKey: import.meta.env.API_KEY,
             temperature: dane?.temperature || 1,
           });
           const chatPrompt = ChatPromptTemplate.fromMessages([
