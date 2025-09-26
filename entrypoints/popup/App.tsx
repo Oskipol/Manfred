@@ -9,12 +9,13 @@ function App() {
   const [isHidden, setIsHidden] = useState(true);
   const [isRoad, setIsRoad] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [Mymodel, setMymodel] = useState("");
+  const [Mymodel, setMymodel] = useState("casual_fu");
   const [summaryLength, setSummaryLength] = useState(0);
   const slider =document.querySelector('.length-slider');
   const [znajdz, setZnajdz]=useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFindingLoading, setIsFindingLoading] = useState(false);
+  const [main, setmain] = useState(true);
 
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem('volume');
@@ -80,16 +81,19 @@ function App() {
   const pokazOpis = () => {
     setIsHidden(true);
     setIsRoad(true);
+    setmain(true);
   };
   
   const pokazFiszki = () => {
     setIsHidden(false);
     setIsRoad(true);
+    setmain(false);
   };
   
   const pokazRoadmap = () => {
     setIsHidden(true);
     setIsRoad(false);
+    setmain(false);
   };
   const handleMouseDown = () => {
     pressTimer.current = setTimeout(() => {
@@ -179,14 +183,14 @@ function App() {
         <div className='tabs roboto' onClick={pokazFiszki}>FISZKI</div>
         </div>
         <div style={{scale:0.7, position:"absolute", right: "0"}}><Changemode /></div>
-        <div id='opis'>
+        <div id='opis' >
           <div className='wybor'>
           <select 
             id="type" 
             value={Mymodel}
             onChange={(e) => setMymodel(e.target.value)}
           >
-            <option className='roboto' value="" disabled >Wybierz model</option>
+            <option className='roboto' value="casual_fu" selected disabled>Wybierz model</option>
             <option className='roboto' value="prof_eng">Professional English</option>
             <option className='roboto' value="prof_pl">Professional Polish</option>
             <option className='roboto' value="casual_eng">Casual English</option>
@@ -217,7 +221,7 @@ function App() {
         </button>
           </div>
         </div>
-        <div className='tekst roboto'>
+        <div className={`tekst roboto ${main ? 'dziala' : 'niedziala'}`}>
         {text}
         <div className='speaker-container'>
           <PiSpeakerLowFill 

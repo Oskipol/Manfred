@@ -10,6 +10,7 @@ export default defineBackground(() => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const dane = models.find(model => model.name === message.Mymodel);
     const dl = message.ll as "l1" | "l2" | "l3";
+    console.log(dl);
     if (message.type === 'ustaw') {
       (async () => {
         try {
@@ -19,6 +20,7 @@ export default defineBackground(() => {
             apiKey: import.meta.env.API_KEY,
             temperature: dane?.temperature || 1,
           });
+          console.log(message.Mymodel);
           const chatPrompt = ChatPromptTemplate.fromMessages([
             ["system", message.znajdz? "Jesteś asystentem przeszukującym internet. Dla poniższego tekstu znajdź strony o podobnej treści.  " : (dane?.sys_prompt || "You are a helpful assistant that summarizes websites.")],
             [

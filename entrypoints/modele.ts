@@ -45,6 +45,17 @@ const models = [
     },
     {
         id: "gpt-4o-mini",
+        name: "casual_fu",
+        temperature: 1,
+        prompt: "Streść poniższą stronę w barwny, kreatywny i łatwy do czytania sposób.  ",
+        l1: "-Długość: Krótkie → 1–2 chwytliwe zdania z haczykiem.  ",
+        l2: "-Długość: Średnie → krótki narracyjny akapit podkreślający kluczowe idee.  ",
+        l3: "-Długość: Szczegółowe → kilka akapitów, w których główne punkty są splecione w mini-opowieść, z przykładami, metaforami lub obrazowym językiem.  ",
+        prompt2: "- Spraw, aby tekst był angażujący, a nie suchy.  - Użyj tonu narracyjnego, który przyciąga uwagę.  - Podkreśl najważniejsze wnioski, ale przedstaw je w prosty i zapadający w pamięć sposób.  ",
+        sys_prompt: "Jesteś kreatywnym storytellerem i streszczaczem treści. Twoje mocne strony to: - zamienianie suchych informacji w angażujące streszczenia w formie opowieści,  - używanie obrazowego języka, metafor i technik narracyjnych,  - sprawianie, że kluczowe idee są łatwe do zapamiętania i przyjemne w odbiorze,  - dostosowywanie poziomu szczegółowości do żądanej długości streszczenia. "
+    },
+    {
+        id: "gpt-4o-mini",
         name: "fiszki",
         temperature: 0.7,
         sys_prompt: "Jesteś doświadczonym nauczycielem i egzaminatorem. Tworzysz wysokiej jakości pytania sprawdzające na podstawie podanego tekstu źródłowego. Specjalizujesz się w tworzeniu pytań, które sprawdzają rzeczywiste zrozumienie tekstu, a nie tylko powierzchowne zapamiętanie.",

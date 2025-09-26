@@ -84,6 +84,12 @@
 .pokaz2{
   animation: pokaz2 0.5s forwards;
 }
+.dziala{
+  display: flex;
+}
+.niedziala{
+  display: none;
+}
 #roadmap{
   position: absolute;
   width: 100%;
